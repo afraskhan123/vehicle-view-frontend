@@ -1,67 +1,58 @@
+import { Vehicle } from '../types/vehicle';
 
-import { Vehicle, CreateVehicleData, UpdateVehicleData } from '@/types/vehicle';
-
-// Mock data storage - replace with real API calls
-const STORAGE_KEY = 'vehicles';
-
-const getStoredVehicles = (): Vehicle[] => {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  return stored ? JSON.parse(stored) : [];
-};
-
-const saveVehicles = (vehicles: Vehicle[]) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(vehicles));
-};
-
-const generateId = () => Math.random().toString(36).substr(2, 9);
+const API_URL = 'http://localhost:5000/api';
 
 export const vehicleService = {
-  getAll: async (): Promise<Vehicle[]> => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
-    return getStoredVehicles();
+  async getAll(): Promise<Vehicle[]> {
+    const response = await fetch(`${API_URL}/vehicles`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch vehicles');
+    }
+    return response.json();
   },
 
-  getById: async (id: string): Promise<Vehicle | null> => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const vehicles = getStoredVehicles();
-    return vehicles.find(v => v.id === id) || null;
+  async getById(id: number): Promise<Vehicle> {
+    const response = await fetch(`${API_URL}/vehicles/${id}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch vehicle');
+    }
+    return response.json();
   },
 
-  create: async (data: CreateVehicleData): Promise<Vehicle> => {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    const vehicles = getStoredVehicles();
-    const newVehicle: Vehicle = {
-      ...data,
-      id: generateId(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    vehicles.push(newVehicle);
-    saveVehicles(vehicles);
-    return newVehicle;
+  async create(vehicle: Omit<Vehicle, 'id' | 'createdAt' | 'updatedAt'>): Promise<Vehicle> {
+    const response = await fetch(`${API_URL}/vehicles`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(vehicle),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create vehicle');
+    }
+    return response.json();
   },
 
-  update: async (data: UpdateVehicleData): Promise<Vehicle> => {
-    await new Promise(resolve => setTimeout(resolve, 800));
-    const vehicles = getStoredVehicles();
-    const index = vehicles.findIndex(v => v.id === data.id);
-    if (index === -1) throw new Error('Vehicle not found');
-    
-    const updatedVehicle = {
-      ...vehicles[index],
-      ...data,
-      updatedAt: new Date().toISOString(),
-    };
-    vehicles[index] = updatedVehicle;
-    saveVehicles(vehicles);
-    return updatedVehicle;
+  async update(id: number, vehicle: Partial<Vehicle>): Promise<Vehicle> {
+    const response = await fetch(`${API_URL}/vehicles/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(vehicle),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update vehicle');
+    }
+    return response.json();
   },
 
-  delete: async (id: string): Promise<void> => {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    const vehicles = getStoredVehicles();
-    const filtered = vehicles.filter(v => v.id !== id);
-    saveVehicles(filtered);
+  async delete(id: number): Promise<void> {
+    const response = await fetch(`${API_URL}/vehicles/${id}`, {
+      method: 'DELETE',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete vehicle');
+    }
   }
 };

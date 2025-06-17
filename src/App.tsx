@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -26,14 +25,30 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
-const AppRoutes = () => {
-  const { isAuthenticated } = useAuth();
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
+  
+  return isAuthenticated ? <Navigate to="/" replace /> : <>{children}</>;
+};
 
+const AppRoutes = () => {
   return (
     <Routes>
       <Route 
         path="/login" 
-        element={isAuthenticated ? <Navigate to="/" replace /> : <LoginForm />} 
+        element={
+          <PublicRoute>
+            <LoginForm />
+          </PublicRoute>
+        } 
       />
       <Route 
         path="/" 

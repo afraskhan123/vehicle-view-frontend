@@ -1,6 +1,10 @@
-
 export interface Vehicle {
-  id: string;
+  id: number;
+  make: string;
+  model: string;
+  year: number;
+  vin: string;
+  userId: number;
   vccNo: string;
   vccStatus: string;
   vccGenerationDate: string;

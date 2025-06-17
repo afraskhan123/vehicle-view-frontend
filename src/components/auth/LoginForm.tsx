@@ -1,4 +1,3 @@
-
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,18 +9,18 @@ import { useAuth } from '@/hooks/useAuth';
 import { LoginCredentials } from '@/types/auth';
 
 const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  email: z.string().email('Please enter a valid email address').min(1, 'Email is required'),
+  password: z.string().min(6, 'Password must be at least 6 characters').min(1, 'Password is required'),
 });
 
 export const LoginForm = () => {
   const { login, loginLoading } = useAuth();
 
-  const form = useForm<LoginCredentials>({
+  const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: 'admin@example.com',
-      password: 'password',
+      email: '',
+      password: '',
     },
   });
 
@@ -72,11 +71,6 @@ export const LoginForm = () => {
               </Button>
             </form>
           </Form>
-          <div className="mt-4 text-sm text-muted-foreground text-center">
-            <p>Demo credentials:</p>
-            <p>Email: admin@example.com</p>
-            <p>Password: password</p>
-          </div>
         </CardContent>
       </Card>
     </div>

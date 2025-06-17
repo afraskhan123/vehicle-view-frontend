@@ -65,11 +65,8 @@ export const VehicleTable = () => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Vehicle Records</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <Card className='py-1'>
+      <CardContent className='p-0'>
         {vehicles.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
             No vehicles found. Add your first vehicle record.
@@ -79,13 +76,13 @@ export const VehicleTable = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>VCC No</TableHead>
-                  <TableHead>Brand</TableHead>
-                  <TableHead>Model</TableHead>
-                  <TableHead>Year</TableHead>
-                  <TableHead>Color</TableHead>
-                  <TableHead>Owner</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead className='whitespace-nowrap'>VCC No</TableHead>
+                  <TableHead className='whitespace-nowrap'>Brand</TableHead>
+                  <TableHead className='whitespace-nowrap'>Model</TableHead>
+                  <TableHead className='whitespace-nowrap'>Year</TableHead>
+                  <TableHead className='whitespace-nowrap'>Color</TableHead>
+                  <TableHead className='whitespace-nowrap'>Owner</TableHead>
+                  <TableHead className='whitespace-nowrap'>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>

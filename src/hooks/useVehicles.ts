@@ -1,20 +1,19 @@
-
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { vehicleService } from '@/lib/vehicleService';
-import { CreateVehicleData, UpdateVehicleData } from '@/types/vehicle';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { vehicleService } from '../lib/vehicleService';
+import { Vehicle } from '../types/vehicle';
 import { useToast } from '@/hooks/use-toast';
 
 export const useVehicles = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const vehiclesQuery = useQuery({
+  const { data: vehicles, isLoading, error } = useQuery<Vehicle[]>({
     queryKey: ['vehicles'],
-    queryFn: vehicleService.getAll,
+    queryFn: vehicleService.getAll
   });
 
   const createMutation = useMutation({
-    mutationFn: vehicleService.create,
+    mutationFn: (vehicle: Omit<Vehicle, 'id' | 'createdAt' | 'updatedAt'>) => vehicleService.create(vehicle),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicles'] });
       toast({
@@ -32,7 +31,7 @@ export const useVehicles = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: vehicleService.update,
+    mutationFn: (vehicle: Vehicle) => vehicleService.update(vehicle.id, vehicle),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicles'] });
       toast({
@@ -50,7 +49,7 @@ export const useVehicles = () => {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: vehicleService.delete,
+    mutationFn: (id: number) => vehicleService.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['vehicles'] });
       toast({
@@ -68,9 +67,9 @@ export const useVehicles = () => {
   });
 
   return {
-    vehicles: vehiclesQuery.data || [],
-    isLoading: vehiclesQuery.isLoading,
-    error: vehiclesQuery.error,
+    vehicles,
+    isLoading,
+    error,
     createVehicle: createMutation.mutate,
     updateVehicle: updateMutation.mutate,
     deleteVehicle: deleteMutation.mutate,
