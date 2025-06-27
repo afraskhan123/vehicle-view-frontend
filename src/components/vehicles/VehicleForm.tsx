@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,14 +8,13 @@ import { Label } from '../ui/label';
 import { useVehicles } from '../../hooks/useVehicles';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CreateVehicleData, Vehicle } from '@/types/vehicle';
-import { useEffect } from 'react';
 
 const vehicleSchema = z.object({
-  make: z.string().optional(),
-  model: z.string().optional(),
-  year: z.number().optional(),
-  vin: z.string().optional(),
-  userId: z.number().optional(),
+  make: z.string(),
+  model: z.string(),
+  year: z.number(),
+  vin: z.string(),
+  userId: z.number(),
   vccNo: z.string().min(1, 'VCC No is required'),
   vccStatus: z.string().min(1, 'VCC Status is required'),
   vccGenerationDate: z.string().min(1, 'VCC Generation Date is required'),
@@ -24,9 +23,9 @@ const vehicleSchema = z.object({
   yearOfBuilt: z.string().min(1, 'Year of Built is required'),
   vehicleDrive: z.string().min(1, 'Vehicle Drive is required'),
   countryOfOrigin: z.string().min(1, 'Country of Origin is required'),
-  engineCapacity: z.string().optional(),
-  carriageCapacity: z.string().optional(),
-  passengerCapacity: z.string().optional(),
+  engineCapacity: z.string(),
+  carriageCapacity: z.string(),
+  passengerCapacity: z.string(),
   vehicleModel: z.string().min(1, 'Vehicle Model is required'),
   vehicleBrandName: z.string().min(1, 'Vehicle Brand Name is required'),
   vehicleType: z.string().min(1, 'Vehicle Type is required'),
@@ -36,46 +35,60 @@ const vehicleSchema = z.object({
   declarationDate: z.string().min(1, 'Declaration Date is required'),
   ownerCode: z.string().min(1, 'Owner Code is required'),
   ownerName: z.string().min(1, 'Owner Name is required'),
-  printRemarks: z.string().optional()
+  printRemarks: z.string()
 });
 
 type VehicleFormData = z.infer<typeof vehicleSchema>;
 
 interface VehicleFormProps {
-  vehicle?: VehicleFormData;
+  vehicle?: Vehicle;
   onSuccess?: () => void;
 }
 
+const toDateInputValue = (dateStr: string) => {
+  if (!dateStr) return '';
+  if (dateStr.includes('/')) {
+    const [day, month, year] = dateStr.split('/');
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  }
+  return dateStr.slice(0, 10);
+};
+
 export const VehicleForm: React.FC<VehicleFormProps> = ({ vehicle, onSuccess }) => {
-  const { createVehicle, updateVehicle, isCreating, isUpdating } = useVehicles();
+  const { createVehicle, updateVehicle, isCreating, isUpdating, error } = useVehicles();
   const isEditing = !!vehicle;
+
+  // Track previous loading state
+  const prevIsLoading = useRef(false);
+  const isLoading = isCreating || isUpdating;
+
+  useEffect(() => {
+    // If previously loading and now not loading, and no error, call onSuccess
+    if (prevIsLoading.current && !isLoading && !error) {
+      onSuccess?.();
+    }
+    prevIsLoading.current = isLoading;
+  }, [isLoading, error, onSuccess]);
 
   const { register, handleSubmit, formState: { errors } } = useForm<VehicleFormData>({
     resolver: zodResolver(vehicleSchema),
     defaultValues: vehicle
+      ? {
+          ...vehicle,
+          vccGenerationDate: toDateInputValue(vehicle.vccGenerationDate),
+          declarationDate: toDateInputValue(vehicle.declarationDate),
+        }
+      : undefined
   });
-
-  useEffect(() => {
-    if (vehicle) {
-      const { id, createdAt, updatedAt, ...vehicleData } = vehicle;
-      // Reset form with vehicle data
-      // Note: You might want to handle the reset differently based on your form implementation
-    }
-  }, [vehicle]);
 
   const onSubmit = (data: VehicleFormData) => {
     if (isEditing && vehicle) {
-      updateVehicle({ ...data, id: vehicle.id });
+      updateVehicle({ ...data, id: vehicle.id, createdAt: vehicle.createdAt, updatedAt: vehicle.updatedAt } as Vehicle);
     } else {
-      createVehicle(data);
+      createVehicle(data as Omit<Vehicle, 'id' | 'createdAt' | 'updatedAt'>);
     }
-    if (!isEditing) {
-      // Reset form if it's a new vehicle
-    }
-    onSuccess?.();
+    // Do not call onSuccess here; it will be called in useEffect after mutation success
   };
-
-  const isLoading = isCreating || isUpdating;
 
   return (
     <Card>

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Eye, Edit, Trash2, Download, QrCode } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,8 @@ import { useVehicles } from '@/hooks/useVehicles';
 import { Vehicle } from '@/types/vehicle';
 import { VehicleForm } from './VehicleForm';
 import { VehicleDetails } from './VehicleDetails';
-import { generateVehiclePDF } from '@/lib/pdfGenerator';
+import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
+import VehiclePDF from './VehiclePDF';
 import { useToast } from '@/hooks/use-toast';
 
 export const VehicleTable = () => {
@@ -22,26 +22,6 @@ export const VehicleTable = () => {
   const handleDelete = (vehicle: Vehicle) => {
     if (confirm(`Are you sure you want to delete vehicle ${vehicle.vccNo}?`)) {
       deleteVehicle(vehicle.id);
-    }
-  };
-
-  const handleDownloadPDF = async (vehicle: Vehicle) => {
-    try {
-      const pdfDataUri = await generateVehiclePDF(vehicle);
-      const link = document.createElement('a');
-      link.href = pdfDataUri;
-      link.download = `VCC_${vehicle.vccNo}.pdf`;
-      link.click();
-      toast({
-        title: 'PDF Downloaded',
-        description: 'Vehicle certificate has been downloaded successfully.',
-      });
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to generate PDF.',
-        variant: 'destructive',
-      });
     }
   };
 
@@ -66,6 +46,9 @@ export const VehicleTable = () => {
 
   return (
     <Card className='py-1'>
+      {/* <PDFViewer width="100%" height={600}>
+        <VehiclePDF vehicle={vehicles[0]} />
+      </PDFViewer> */}
       <CardContent className='p-0'>
         {vehicles.length === 0 ? (
           <div className="text-center text-muted-foreground py-8">
@@ -136,14 +119,17 @@ export const VehicleTable = () => {
                             )}
                           </DialogContent>
                         </Dialog>
-
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDownloadPDF(vehicle)}
+                        <PDFDownloadLink
+                          document={<VehiclePDF vehicle={vehicle} />}
+                          fileName={`VCC_${vehicle.vccNo}.pdf`}
                         >
-                          <Download className="h-4 w-4" />
-                        </Button>
+                          {({ loading }) => (
+                            <Button variant="outline" size="sm" disabled={loading}>
+                              <Download className="h-4 w-4" />
+                              {loading ? 'Generating...' : ''}
+                            </Button>
+                          )}
+                        </PDFDownloadLink>
 
                         <Button
                           variant="outline"

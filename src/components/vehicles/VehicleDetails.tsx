@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Vehicle } from '@/types/vehicle';
 
@@ -6,11 +5,20 @@ interface VehicleDetailsProps {
   vehicle: Vehicle;
 }
 
+// Utility to format date as DD/MM/YYYY
+const formatDateDMY = (dateStr: string) => {
+  const d = new Date(dateStr);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
 export const VehicleDetails = ({ vehicle }: VehicleDetailsProps) => {
   const details = [
     { label: 'VCC Number', value: vehicle.vccNo },
     { label: 'VCC Status', value: vehicle.vccStatus },
-    { label: 'VCC Generation Date', value: vehicle.vccGenerationDate },
+    { label: 'VCC Generation Date', value: formatDateDMY(vehicle.vccGenerationDate) },
     { label: 'Chassis Number', value: vehicle.chassisNo },
     { label: 'Engine Number', value: vehicle.engineNumber },
     { label: 'Year of Built', value: vehicle.yearOfBuilt },
@@ -25,7 +33,7 @@ export const VehicleDetails = ({ vehicle }: VehicleDetailsProps) => {
     { label: 'Vehicle Color', value: vehicle.vehicleColor },
     { label: 'Specification Standard Name', value: vehicle.specificationStandardName },
     { label: 'Declaration Number', value: vehicle.declarationNumber },
-    { label: 'Declaration Date', value: vehicle.declarationDate },
+    { label: 'Declaration Date', value: formatDateDMY(vehicle.declarationDate) },
     { label: 'Owner Code', value: vehicle.ownerCode },
     { label: 'Owner Name', value: vehicle.ownerName },
     { label: 'Print Remarks', value: vehicle.printRemarks || 'N/A' },
@@ -46,8 +54,8 @@ export const VehicleDetails = ({ vehicle }: VehicleDetailsProps) => {
           ))}
         </div>
         <div className="mt-6 text-xs text-muted-foreground">
-          <p>Created: {new Date(vehicle.createdAt).toLocaleString()}</p>
-          <p>Updated: {new Date(vehicle.updatedAt).toLocaleString()}</p>
+          <p>Created: {formatDateDMY(vehicle.createdAt)}</p>
+          <p>Updated: {formatDateDMY(vehicle.updatedAt)}</p>
         </div>
       </CardContent>
     </Card>
