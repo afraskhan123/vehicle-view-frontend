@@ -1,7 +1,7 @@
+import { env } from '@/config/env';
 import { LoginCredentials, AuthResponse, User } from '@/types/auth';
 
-const API_URL = 'http://localhost:5000/api/auth';
-
+const API_URL = env.VITE_APP_BASE_URL
 // Mock authentication - replace with real API calls
 export const authService = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {

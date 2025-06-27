@@ -1,6 +1,7 @@
+import { env } from '@/config/env';
 import { Vehicle } from '../types/vehicle';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = env.VITE_APP_BASE_URL
 
 export const vehicleService = {
   async getAll(): Promise<Vehicle[]> {
